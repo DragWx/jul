@@ -47,20 +47,20 @@
 		$tprev = mysql_result(mysql_query("SELECT id FROM threads WHERE lastpostdate=$tprev"), 0, 0);
 
 		if ($tnext)
-		$nextnewer = "<a href=thread.php?id=$tnext>Next newer thread</a>";
+		$nextnewer = "<a href=\"thread.php?id=$tnext\">Next newer thread</a>";
 		if ($tprev)
-		$nextolder = "<a href=thread.php?id=$tprev>Next older thread</a>";
+		$nextolder = "<a href=\"thread.php?id=$tprev\">Next older thread</a>";
 		if ($nextnewer && $nextolder)
 		$nextnewer	.= ' | ';
 		if (@mysql_fetch_array(mysql_query("SELECT * FROM favorites WHERE user=$loguserid AND thread=$id")))
-		$favlink = "<a href=forum.php?act=rem&thread=$id>Remove from favorites</a>";
+		$favlink = "<a href=\"forum.php?act=rem&thread=$id\">Remove from favorites</a>";
 		else
-		$favlink = "<a href=forum.php?act=add&thread=$id>Add to favorites</a>";
+		$favlink = "<a href=\"forum.php?act=add&thread=$id\">Add to favorites</a>";
 		if ($nextnewer or $nextolder)
 		$favlink	.= ' | ';
 
 		mysql_query("UPDATE threads SET views=views+1 WHERE id=$id");
-		$thread[title] = str_replace("<", "<", $thread[title]);
+		$thread[title] = str_replace("<", "<", $thread[title]); // TODO: What's this?
 		if ($forum[minpower] > $power and $forum[minpower] > 0)
 		$thread[title] = "(restricted)";
 		$forumtitle = "$forum[title]: ";
@@ -109,20 +109,20 @@
 			printtimedif($startingtime);
 			exit;
 		} else {
-			$fulledit = "<a href=editthread.php?id=$id>Edit thread<a>";
-			$link = "<a href=thread.php?id=$id&qmod=1";
+			$fulledit = "<a href=\"editthread.php?id=$id\">Edit thread</a>";
+			$link = "<a href=\"thread.php?id=$id&qmod=1";
 			if (!$thread[sticky])
-				$stick = "$link&st=1>Stick</a>";
+				$stick = "$link&st=1\">Stick</a>";
 			else
-				$stick = "$link&st=0>Unstick</a>";
+				$stick = "$link&st=0\">Unstick</a>";
 			if (!$thread[closed])
-				$close = "$link&cl=1>Close</a>";
+				$close = "$link&cl=1\">Close</a>";
 			else
-				$close = "$link&cl=0>Open</a>";
+				$close = "$link&cl=0\">Open</a>";
 			if ($thread[forum] != $trashid)
 				$trash = " |  <a href='/editthread.php?action=trashthread&id=$id'>Trash</a>";
 			$delete = "<a href='/editthread.php?action=editthread&delete=1&id=$id'>Delete</a>";
-			$modfeats = "<tr>$tccellcls colspan=2>Moderating options: $stick | $close$trash -- $fulledit";
+			$modfeats = "<tr>$tccellcls colspan=\"2\">Moderating options: $stick | $close$trash -- $fulledit</tr>";
 		}
 	}
 	if ($thread[poll]) {
@@ -187,27 +187,51 @@
 			$votes = "$votes vote".($votes == 1 ? '' : 's');
 		}
 
-		$barpart = "<table cellpadding=0 cellspacing=0 width=$pct% bgcolor='".($pollc[color] ? $pollc[color] : "cccccc")."'><td>&nbsp;</table>";
+		// Old method
+		//$barpart = "<table cellpadding=\"0\" cellspacing=\"0\" width=\"$pct%\" bgcolor='".($pollc[color] ? $pollc[color] : "cccccc")."'><td>&nbsp;</td></table>";
+		// New method, uses CSS, but requires some extra steps to make sure people don't add extra crap to the CSS.
+		if ($pollc[color]) {
+			// There is a color specified. First, strip anything that comes after a semicolon.
+			// This avoids people trying to use colors like "FFF; some-other-css-property: derp"
+			$pollcolor = explode(';', $pollc[color])[0];
+			// Now we determine whether or not to add a #, by figuring out what the color is.
+			if (preg_match('/^(#)?[0-9a-f]{3}([0-9a-f]{3})?$/i', $pollcolor) == 1) {
+				// This matches a three or six digit hex value. If there's no # already, add it.
+				if ($pollcolor{0} != '#')
+					$pollcolor = "#$pollcolor";
+			} elseif (preg_match('/^[a-z]+$/i', $col) == 0) {
+				// This checks if it's a non-numeric string (so color words like "red" and "green" can be used).
+				// If it found none (for example, a ! or a ; were present (even though ; should be stripped out already))
+				// then it returns a blank color.
+				$pollcolor = "";
+			}
+		}
+		// At this point, if $pollcolor is blank or doesn't exist, then no (valid) color was specified, so fall back
+		// to some default color.
+		if (!$pollcolor)
+			$pollcolor = "#ccc";
+		
+		$barpart = "<div style=\"width: $pct%; background-color: $pollcolor;\">&nbsp;</div>";
 		if ($pct == "0.0")
 			$barpart = '&nbsp;';
 		$link = '';
 
 		if ($loguserid and(!$voted or $poll[doublevote]) and ! $poll[closed])
-			$link = "<a href=thread.php?id=$id&choice=$pollc[id]&dat=".md5($loguser['name']."sillysaltstring")."&action=vote";
+			$link = "<a href=\"thread.php?id=$id&choice=$pollc[id]&dat=".md5($loguser['name']."sillysaltstring")."&action=vote";
 
 		if ($uservote[$pollc['id']]) {
 			$dot = "<img src=\"images/dot4.gif\" align=\"absmiddle\"> ";
 			$link	.= "del";
 		} else {
-			$dot = "<img src=\"images/_.gif\" width=8 height=8 align=\"absmiddle\"> ";
+			$dot = "<img src=\"images/_.gif\" width=\"8\" height=\"8\" align=\"absmiddle\"> ";
 		}
 
 		if ($link)
-			$link	.= ">";
+			$link	.= "\">";
 		$choices	.= "
-				  $tccell1l width=20%>$dot$link".($pollc['choice'])."</a></td>
-				  $tccell2l width=60%>$barpart</td>
-				  $tccell1 width=20%>".($poll['doublevote'] ? "$pct% of users, $votes ($pct2%)" : "$pct%, $votes")."<tr>
+				  <tr>$tccell1l width=\"20%\">$dot$link".($pollc['choice']).($link ? "</a>" : "")."</td>
+				  $tccell2l width=\"60%\">$barpart</td>
+				  $tccell1 width=\"20%\">".($poll['doublevote'] ? "$pct% of users, $votes ($pct2%)" : "$pct%, $votes")."</td></tr>
 				";
 
 		}
@@ -225,10 +249,10 @@
 		if ($ismod or $thread[user] == $loguserid)
 		$polledit = "<!-- edit would go here -->";
 		$polltbl = "
-			$tccellc colspan=3><b>".htmlspecialchars($poll['question'])."<tr>
-			$tccell2ls colspan=3>".nl2br(htmlspecialchars($poll['briefing']))."<tr>
+			<tr>$tccellc colspan=3><b>".htmlspecialchars($poll['question'])."</td></tr>
+			<tr>$tccell2ls colspan=3>".nl2br(htmlspecialchars($poll['briefing']))."</td></tr>
 			$choices
-			$tccell2l colspan=3>$smallfont Multi-voting is $mlt. $tvotes user$ss $hv voted. $polledit
+			<tr>$tccell2l colspan=3>$smallfont Multi-voting is $mlt. $tvotes user$ss $hv voted. $polledit</td></tr>
 			$tblend<br>$tblstart
 			";
 	}
@@ -253,16 +277,17 @@
 	if (!$ppp)
 		$ppp = ($log ? $loguser[postsperpage] : 20);
 	if ($log && $id) {
-		$headlinks	.= " - <a href=index.php?action=markforumread&forumid=$forum[id]>Mark forum read</a>";
+		$headlinks	.= " - <a href=\"index.php?action=markforumread&forumid=$forum[id]\">Mark forum read</a>";
 		$header = makeheader($header1, $headlinks, $header2 . "$tblstart$tccell1s>$fonline$tblend");
 	}
 
+	// TODO: Replace the refresh here. (possibly make the delay longer)
 	if ($id && $power < $forum[minpower]) {
 		print "
 		$header$tblstart
 		$tccell1>Couldn't enter the forum. Either you don't have access to this restricted forum, or you are not logged in.
 		<br>Click <a href=index.php>here</a> to return to the board, or wait to get redirected.
-		<META HTTP-EQUIV=REFRESH CONTENT=0;URL=index.php>
+		<META HTTP-EQUIV=\"REFRESH\" CONTENT=\"0;URL=index.php\">
 		$tblend
 		";
 	} else {
@@ -318,17 +343,17 @@
 		for ($i = 0; $post = mysql_fetch_array($posts); $i++) {
 		$bg = $i % 2 + 1;
 		
-		$postlist	.= '<tr>';
+		$postlist	.= '<tr>';	//TODO: Examine this, possible floating <tr> outside of any <table>
 		
 		$quote = "<a href=\"thread.php?pid=$post[id]#$post[id]\">Link</a>";
 		$edit = '';
 		if ($id and ! $thread[closed])
-			$quote	.= " | <a href=newreply.php?id=$id&postid=$post[id]>Quote</a>";
-		$deletelink = "<a href=editpost.php?id=$post[id]&action=delete>Delete</a>";
+			$quote	.= " | <a href=\"newreply.php?id=$id&postid=$post[id]\">Quote</a>";
+		$deletelink = "<a href=\"editpost.php?id=$post[id]&action=delete\">Delete</a>";
 		if (($ismod or $post[user] == $loguserid) and ! $thread[closed])
-			$edit = ($quote ? ' | ' : '')."<a href=editpost.php?id=$post[id]>Edit</a> | $deletelink";
+			$edit = ($quote ? ' | ' : '')."<a href=\"editpost.php?id=$post[id]\">Edit</a> | $deletelink";
 		if ($isadmin)
-			$ip = " | IP: <a href=ipsearch.php?ip=$post[ip]>$post[ip]</a>";
+			$ip = " | IP: <a href=\"ipsearch.php?ip=$post[ip]\">$post[ip]</a>";
 		if (!$id) {
 			$pthread = mysql_fetch_array(mysql_query("SELECT id,title,forum FROM threads WHERE id=$post[thread]"));
 			$pforum = @mysql_fetch_array(mysql_query("SELECT minpower FROM forums WHERE id=$pthread[forum]"));
@@ -337,7 +362,7 @@
 		if ($pforum[minpower] <= $power or ! $pforum[minpower]) {
 			$postlist	.= threadpost($post, $bg, $pthread);
 		} else
-			$postlist	.= "$tccellc colspan=2>$fonttag (restricted)";
+			$postlist	.= "$tccellc colspan=\"2\">$fonttag (restricted)";
 		}
 		$query = preg_replace("'page=([0-9].*)'si", '', '?'.getenv("QUERY_STRING"));
 		$query = preg_replace("'pid=(\d.*)'si", "id=$id", $query);
@@ -352,54 +377,54 @@
 		if ($i == $page)
 			$pagelinks	.= " ".($i + 1);
 		else
-			$pagelinks	.= " <a href=thread.php$query"."page=$i>".($i + 1)."</a>";
+			$pagelinks	.= " <a href=\"thread.php$query"."page=$i\">".($i + 1)."</a>";
 		}
 		
 		if ($thread[replies] < $ppp)
 		$pagelinks = '';
 		print $header.sizelimitjs()."
-		<table width=100%><td align=left>$fonttag<a href=index.php>$boardname</a> - <a href=forum.php?id=$forumid>$forum[title]</a> - $thread[title]</td><td align=right>$smallfont
+		<table width=\"100%\"><tr><td align=\"left\">$fonttag<a href=\"index.php\">$boardname</a> - <a href=\"forum.php?id=$forumid\">$forum[title]</a> - $thread[title]</td><td align=\"right\">$smallfont
 		";
 		
 		if ($forumid > -1) {
 			if (!$forum['nopolls']) {
-				print "<a href=newthread.php?poll=1&id=$forumid>$newpollpic</a> - ";
+				print "<a href=\"newthread.php?poll=1&id=$forumid\">$newpollpic</a> - ";
 			} else {
 				print "<img src=\"images/nopolls.png\" align=\"absmiddle\"> - ";
 			}
 			
-			print "<a href=newthread.php?id=$forumid>$newthreadpic</a>";
+			print "<a href=\"newthread.php?id=$forumid\">$newthreadpic</a>";
 			
 			if (!$thread[closed])
-				print " - <a href=newreply.php?id=$id>$newreplypic</a>";
+				print " - <a href=\"newreply.php?id=$id\">$newreplypic</a>";
 			else
 				print " - $closedpic";
 		}
-		print "</table><table width=100%><td align=left>$smallfont$pagelinks</td><td align=right>$smallfont$favlink$nextnewer$nextolder</table>
+		print "</td></tr></table><table width=\"100%\"><tr><td align=\"left\">$smallfont$pagelinks</td><td align=\"right\">$smallfont$favlink$nextnewer$nextolder</td></tr></table>
 		$tblstart
 		";
 		print "$postlist$tblstart$modfeats$tblend
-		<table width=100%><td align=left>$smallfont$pagelinks</td><td align=right>$smallfont$favlink$nextnewer$nextolder</table>
-		<table width=100%><td align=left>$fonttag<a href=index.php>$boardname</a> - <a href=forum.php?id=$forumid>$forum[title]</a> - $thread[title]</td><td align=right>$smallfont
+		<table width=\"100%\"><tr><td align=\"left\">$smallfont$pagelinks</td><td align=\"right\">$smallfont$favlink$nextnewer$nextolder</td></tr></table>
+		<table width=\"100%\"><tr><td align=\"left\">$fonttag<a href=\"index.php\">$boardname</a> - <a href=\"forum.php?id=$forumid\">$forum[title]</a> - $thread[title]</td><td align=\"right\">$smallfont
 		";
 
 		if ($forumid) {
 			if (!$forum['nopolls']) {
-				print "<a href=newthread.php?poll=1&id=$forumid>$newpollpic</a> - ";
+				print "<a href=\"newthread.php?poll=1&id=$forumid\">$newpollpic</a> - ";
 			} else {
 				print "<img src=\"images/nopolls.png\" align=\"absmiddle\"> - ";
 			}
 
 			//      print "<a href=newthread.php?poll=1&id=$forumid>$newpollpic</a> - ";
-			print "<a href=newthread.php?id=$forumid>$newthreadpic</a>";
+			print "<a href=\"newthread.php?id=$forumid\">$newthreadpic</a>";
 
 			if (!$thread[closed]) {
-				print " - <a href=newreply.php?id=$id>$newreplypic</a>";
+				print " - <a href=\"newreply.php?id=$id\">$newreplypic</a>";
 			} else {
 				print " - $closedpic";
 			}
 		}
-		print "</table>";
+		print "</td></tr></table>";
 	}
 	print $footer;
 	printtimedif($startingtime);
