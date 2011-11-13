@@ -703,13 +703,14 @@ function fonlineusers($id){
 	for($numon=0;$onuser=mysql_fetch_array($onusers);$numon++){
 		if($numon) { $onlineusers.=', '; }
 
-		$namecolor = getnamecolor($onuser[sex],$onuser[powerlevel]);
+		//$namecolor = getnamecolor($onuser[sex],$onuser[powerlevel]);
 
 		/* if ((!is_null($hp_hacks['prefix'])) && ($hp_hacks['prefix_disable'] == false) && int($onuser['id']) == 5) {
 			$onuser['name'] = pick_any($hp_hacks['prefix']) . " " . $onuser['name'];
 		} */
 
-		$namelink="<a href=profile.php?id=$onuser[id]><font $namecolor>$onuser[name]</font></a>";
+		//$namelink="<a href=profile.php?id=$onuser[id]><font $namecolor>$onuser[name]</font></a>";
+		$namelink=printusername($onuser);
 		$onlineusers.='<nobr>';
 		$onuser[minipic]=str_replace('>','&gt',$onuser[minipic]);
 		if($onuser[minipic]) $onlineusers.="<img width=16 height=16 src=$onuser[minipic] align=top> ";
@@ -829,6 +830,8 @@ function getnamecolor($sex,$powl){
 // --Drag
 // Output an appropriately formatted colored username link.
 // $user is an array with keys: id, name, sex, powerlevel -- you're probably querying mySQL for these right beforehand.
+// ****** Places where this needed a workaround ******
+// index.php -- The last poster for a forum (user id was 'uid')
 function printusername($user) {
 	// Get the username color, and isolate the color part.
 	// This is so getnamecolor can be left alone until all instances of username links use this function.
@@ -840,7 +843,7 @@ function printusername($user) {
 
 function redirect($url,$msg,$delay){
 	if($delay<1) $delay=1;
-	return "You will now be redirected to <a href=$url>$msg</a>...<META HTTP-EQUIV=REFRESH CONTENT=$delay;URL=$url>";
+	return "You will now be redirected to <a href=\"$url\">$msg</a>...<META HTTP-EQUIV=\"REFRESH\" CONTENT=\"$delay;URL=$url\">";
 }
 
 function postradar($userid){
@@ -856,8 +859,10 @@ function postradar($userid){
 				$t=(!$hacks['noposts'] ? $dif : "") ." behind";
 			}
 			if($dif==0) $t=' tied with';
-			$namecolor=getnamecolor($b[sex],$b[powerlevel]);
-			$namelink="<a href=profile.php?id=$b[4]><font $namecolor>$b[name]</font></a>";
+			//$namecolor=getnamecolor($b[sex],$b[powerlevel]);
+			//$namelink="<a href=profile.php?id=$b[4]><font $namecolor>$b[name]</font></a>";
+			//This one I'm a little unsure of since it references [4] instead of [id], but it should be the same thing...
+			$namelink=printusername($b);
 			$t.=" $namelink". (!$hacks['noposts'] ? " ($b[1])" : "");
 			return $t;
 		}
@@ -913,6 +918,7 @@ function mysql_get($query){
 }
 function sizelimitjs(){
 	// where the fuck is this used?!
+	// This is used in thread.php, but it seems to do nothing useful. --Drag
 	return "";
   /*return '
 	<script>
