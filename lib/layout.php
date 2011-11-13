@@ -35,6 +35,7 @@
 	$race=postradar($loguserid);
 
 	$tablewidth='100%';
+	// TODO: Change these to <span> tags. This requires changing the end tags in the strings these appear in.
 	$fonttag='<font class="font">';
 	$fonthead='<font class="fonth">';
 	$smallfont='<font class="fonts">';
@@ -289,7 +290,7 @@
 
 		if ($pmsgnew != 1) $ssss = "s";
 		if ($pmsgnew > 0) $privatebox="
-		<tr><td colspan=\"3\" class='tbl tdbg2 center fonts'>$new <a href=\"private.php\">You have $pmsgnew new private message$ssss</a> -- $lastmsg
+		<tr><td colspan=\"3\" class='tbl tdbg2 center fonts'>$new <a href=\"private.php\">You have $pmsgnew new private message$ssss</a> -- $lastmsg</td></tr>
 		";
 		else $privatebox = "";
 	}
@@ -333,17 +334,17 @@
 	$yyy
 	<center>
 	 $tblstart
-	  <td class='tbl tdbg1 center' colspan=3>$boardtitle";
+	  <tr><td class='tbl tdbg1 center' colspan=\"3\">$boardtitle";
   $header2="
 	  ". (!$x_hacks['smallbrowse'] ? "
-	  </td><tr>
-		  <td width='120px' class='tbl tdbg2 center fonts'><nobr>Views: $views<br><img src=images/_.gif width=120 height=1></td>
+	  </td></tr>
+		  <tr><td width='120px' class='tbl tdbg2 center fonts'><nobr>Views: $views<br><img src=\"images/_.gif\" width=\"120\" height=\"1\"></td>
 		  <td width='100%' class='tbl tdbg2 center fonts'>$headlinks2</td>
-		  <td width='120px' class='tbl tdbg2 center fonts'><nobr>".  date($dateformat,ctime()+$tzoff) ."<br><img src=images/_.gif width=120 height=1><tr>" 
+		  <td width='120px' class='tbl tdbg2 center fonts'><nobr>".  date($dateformat,ctime()+$tzoff) ."<br><img src=\"images/_.gif\" width=\"120\" height=\"1\"></td></tr>" 
 		: "<br>$views views, ". date($dateformat,ctime()+$tzoff) ."
-		  </td><tr>
-			<td width=100% class='tbl tdbg2 center fonts' colspan=3>$headlinks2</td><tr>") ."
-	  <td colspan=3 class='tbl tdbg1 center fonts'>$race
+		  </td></tr>
+			<tr><td width=\"100%\" class='tbl tdbg2 center fonts' colspan=\"3\">$headlinks2</td></tr>") ."
+	  <tr><td colspan=\"3\" class='tbl tdbg1 center fonts'>$race</td></tr>
 	  $privatebox
 	 $tblend
 	</center>";
