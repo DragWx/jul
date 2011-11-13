@@ -841,6 +841,12 @@ function printusername($user) {
 	return "<a href=\"profile.php?id=$user[id]\" style=\"color: #$namecolor\">$user[name]</a>";
 }
 
+// TODO: Redirects must be placed in the <head> of the page. This is going to need some effort, because by the time
+//	this function tends to be called, the page has already output the header.
+// Proposal: Add a variable to $header1 for a <meta http-equiv="refresh"> tag in the <head>, then
+//	have redirect() set this variable. Finally, find every location where redirect() is called within a print statement,
+//	and update it so it does something like $redirecttext = redirect(); beforehand, and then prints $redirecttext
+//	where it would've originally called redirect().
 function redirect($url,$msg,$delay){
 	if($delay<1) $delay=1;
 	return "You will now be redirected to <a href=\"$url\">$msg</a>...<META HTTP-EQUIV=\"REFRESH\" CONTENT=\"$delay;URL=$url\">";
