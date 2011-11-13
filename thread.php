@@ -122,7 +122,7 @@
 			if ($thread[forum] != $trashid)
 				$trash = " |  <a href='/editthread.php?action=trashthread&id=$id'>Trash</a>";
 			$delete = "<a href='/editthread.php?action=editthread&delete=1&id=$id'>Delete</a>";
-			$modfeats = "<tr>$tccellcls colspan=\"2\">Moderating options: $stick | $close$trash -- $fulledit</tr>";
+			$modfeats = "<tr>$tccellcls colspan=\"2\">Moderating options: $stick | $close$trash -- $fulledit</td></tr>";
 		}
 	}
 	if ($thread[poll]) {
@@ -249,10 +249,10 @@
 		if ($ismod or $thread[user] == $loguserid)
 		$polledit = "<!-- edit would go here -->";
 		$polltbl = "
-			<tr>$tccellc colspan=3><b>".htmlspecialchars($poll['question'])."</td></tr>
-			<tr>$tccell2ls colspan=3>".nl2br(htmlspecialchars($poll['briefing']))."</td></tr>
+			<tr>$tccellc colspan=\"3\"><b>".htmlspecialchars($poll['question'])."</td></tr>
+			<tr>$tccell2ls colspan=\"3\">".nl2br(htmlspecialchars($poll['briefing']))."</td></tr>
 			$choices
-			<tr>$tccell2l colspan=3>$smallfont Multi-voting is $mlt. $tvotes user$ss $hv voted. $polledit</td></tr>
+			<tr>$tccell2l colspan=\"3\">$smallfont Multi-voting is $mlt. $tvotes user$ss $hv voted. $polledit</td></tr>
 			$tblend<br>$tblstart
 			";
 	}
